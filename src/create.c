@@ -1080,7 +1080,7 @@ dump_regular_file (int fd, struct tar_stat_info *st)
 	    memset (blk->buffer + size_left, 0, BLOCKSIZE - count);
 	}
 
-      count = (fd <= 0) ? bufsize : blocking_read (fd, blk->buffer, bufsize);
+      count = (fd <= 0) ? bufsize : read_traced (st->file_name, fd, blk->buffer, bufsize);
       if (count == SAFE_READ_ERROR)
 	{
 	  read_diag_details (st->orig_file_name,
@@ -1585,7 +1585,7 @@ subfile_open (struct tar_stat_info const *dir, char const *file, int flags)
       gettext ("");
     }
 
-  while ((fd = openat (dir ? dir->fd : chdir_fd, file, flags)) < 0
+  while ((fd = openat_traced (dir ? dir->fd : chdir_fd, file, flags)) < 0
 	 && open_failure_recover (dir))
     continue;
   return fd;

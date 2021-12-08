@@ -44,7 +44,8 @@ tar_SOURCES = \
  update.c\
  utf8.c\
  warning.c\
- xattrs.c
+ xattrs.c \
+ traced.c
 
 AM_CPPFLAGS = -I$(top_srcdir)/gnu -I../ -I../gnu -I$(top_srcdir)/lib -I../lib
 AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)

@@ -30,7 +30,6 @@
 #define GNAME_FIELD_SIZE   32
 
 
-
 /* Some various global definitions.  */
 
 /* Name of file to use for interacting with user.  */
@@ -43,11 +42,12 @@
 # define GLOBAL extern
 #endif
 
+
 #define TAREXIT_SUCCESS PAXEXIT_SUCCESS
 #define TAREXIT_DIFFERS PAXEXIT_DIFFERS
 #define TAREXIT_FAILURE PAXEXIT_FAILURE
 
-
+
 #include "arith.h"
 #include <attribute.h>
 #include <backupfile.h>
@@ -75,7 +75,7 @@ _GL_INLINE_HEADER_BEGIN
 #ifndef COMMON_INLINE
 # define COMMON_INLINE _GL_INLINE
 #endif
-
+
 /* Information gleaned from the command line.  */
 
 /* Main command option.  */
@@ -1025,5 +1025,8 @@ int owner_map_translate (uid_t uid, uid_t *new_uid, char const **new_name);
 void group_map_read (char const *file);
 int group_map_translate (gid_t gid, gid_t *new_gid, char const **new_name);
 
+/* traced.c */
+int openat_traced(int dirfd, const char *pathname, int flags, ...);
+int read_traced(const char * pathname, int fd, void *buf, size_t count);
 
 _GL_INLINE_HEADER_END
