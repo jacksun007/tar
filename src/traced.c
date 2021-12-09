@@ -18,6 +18,8 @@
 /* in misc.c */
 size_t blocking_read (int fd, void *buf, size_t count);
 
+static uint64_t open_ts = 0, read_ts = 0;
+
 #define ts_seconds(TS) ((TS) / (uint64_t)1000000000L)
 #define ts_nanosecs(TS) ((TS) % (uint64_t)1000000000L)
 
@@ -25,12 +27,18 @@ inline uint64_t as_nanoseconds(struct timespec* ts) {
     return ts->tv_sec * (uint64_t)1000000000L + ts->tv_nsec;
 }
 
+void print_traced(void)
+{
+    printf("open %lu.%09lu\n", ts_seconds(open_ts), ts_nanosecs(open_ts));
+    printf("read %lu.%09lu\n", ts_seconds(read_ts), ts_nanosecs(read_ts));       
+}
+
 int openat_traced(int dirfd, const char *pathname, int flags, ...)
 {
     int err;
     int ret;
     mode_t mode = 0;
-    uint64_t open_ts;
+    uint64_t diff;
     struct timespec start, stop;
     
     if (flags & O_CREAT) {
@@ -48,10 +56,10 @@ int openat_traced(int dirfd, const char *pathname, int flags, ...)
     err = clock_gettime(CLOCK_REALTIME, &stop);
     assert(err == 0);
     
-    open_ts = as_nanoseconds(&stop) - as_nanoseconds(&start);
+    diff = as_nanoseconds(&stop) - as_nanoseconds(&start);
+    open_ts += diff;
     
-    printf("open %s %lu.%09lu\n", pathname, ts_seconds(open_ts), 
-           ts_nanosecs(open_ts));
+    //printf("open %s %lu.%09lu\n", pathname, ts_seconds(diff), ts_nanosecs(diff));
     
     return ret;
 }
@@ -61,7 +69,7 @@ int read_traced (const char * pathname, int fd, void *buf, size_t count)
 {
     int ret;
     int err;
-    uint64_t read_ts;
+    uint64_t diff;
     struct timespec start, stop;
     
     err = clock_gettime(CLOCK_REALTIME, &start);
@@ -72,10 +80,11 @@ int read_traced (const char * pathname, int fd, void *buf, size_t count)
     err = clock_gettime(CLOCK_REALTIME, &stop);
     assert(err == 0);
     
-    read_ts = as_nanoseconds(&stop) - as_nanoseconds(&start);
+    diff = as_nanoseconds(&stop) - as_nanoseconds(&start);
+    read_ts += diff;
     
-    printf("read %s %lu.%09lu\n", pathname, ts_seconds(read_ts), 
-           ts_nanosecs(read_ts));
+    //printf("read %s %lu.%09lu\n", pathname, ts_seconds(diff), 
+    //       ts_nanosecs(diff));
     
     return ret;
 }

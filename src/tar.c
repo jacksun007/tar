@@ -2835,6 +2835,8 @@ main (int argc, char **argv)
   if (volno_file_option)
     closeout_volume_number ();
 
+  print_traced();
+
   /* Dispose of allocated memory, and return.  */
 
   free (archive_name_array);
