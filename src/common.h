@@ -1028,6 +1028,7 @@ int group_map_translate (gid_t gid, gid_t *new_gid, char const **new_name);
 /* traced.c */
 int openat_traced(int dirfd, const char *pathname, int flags, ...);
 int read_traced(const char * pathname, int fd, void *buf, size_t count);
+int fstat_traced(int fd, struct stat * buf);
 void print_traced(void);
 
 _GL_INLINE_HEADER_END

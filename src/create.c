@@ -1393,7 +1393,7 @@ create_archive (void)
 			      break;
 			    }
 			  st.fd = fd;
-			  if (fstat (fd, &st.stat) != 0)
+			  if (fstat_traced (fd, &st.stat) != 0)
 			    {
 			      file_removed_diag (p->name, !p->parent,
 						 stat_diag);
@@ -1609,7 +1609,7 @@ restore_parent_fd (struct tar_stat_info const *st)
 
       if (parentfd < 0)
 	parentfd = - errno;
-      else if (! (fstat (parentfd, &parentstat) == 0
+      else if (! (fstat_traced (parentfd, &parentstat) == 0
 		  && parent->stat.st_ino == parentstat.st_ino
 		  && parent->stat.st_dev == parentstat.st_dev))
 	{
@@ -1623,7 +1623,7 @@ restore_parent_fd (struct tar_stat_info const *st)
 			       open_searchdir_flags);
 	  if (0 <= origfd)
 	    {
-	      if (fstat (parentfd, &parentstat) == 0
+	      if (fstat_traced (parentfd, &parentstat) == 0
 		  && parent->stat.st_ino == parentstat.st_ino
 		  && parent->stat.st_dev == parentstat.st_dev)
 		parentfd = origfd;
@@ -1682,7 +1682,7 @@ dump_file0 (struct tar_stat_info *st, char const *name, char const *p)
       else
 	{
 	  st->fd = fd;
-	  if (fstat (fd, &st->stat) != 0)
+	  if (fstat_traced (fd, &st->stat) != 0)
 	    diag = stat_diag;
 	}
     }
@@ -1817,7 +1817,7 @@ dump_file0 (struct tar_stat_info *st, char const *name, char const *p)
 		ok = fstatat (parentfd, name, &final_stat, fstatat_flags) == 0;
 	    }
 	  else
-	    ok = fstat (fd, &final_stat) == 0;
+	    ok = fstat_traced (fd, &final_stat) == 0;
 
 	  if (! ok)
 	    file_removed_diag (p, top_level, stat_diag);

@@ -8,6 +8,7 @@
  * Written by Kuei Sun, on 2021-12-06.  
 */
 
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
 #include <stdint.h>
@@ -18,8 +19,8 @@
 /* in misc.c */
 size_t blocking_read (int fd, void *buf, size_t count);
 
-static uint64_t open_ts = 0, read_ts = 0;
-static uint64_t nr_open = 0;
+static uint64_t open_ts = 0, read_ts = 0, stat_ts = 0;
+static uint64_t nr_open = 0, nr_stat = 0;
 
 #define ts_seconds(TS) ((TS) / (uint64_t)1000000000L)
 #define ts_nanosecs(TS) ((TS) % (uint64_t)1000000000L)
@@ -32,7 +33,9 @@ void print_traced(void)
 {
     printf("open %lu.%09lu\n", ts_seconds(open_ts), ts_nanosecs(open_ts));
     printf("read %lu.%09lu\n", ts_seconds(read_ts), ts_nanosecs(read_ts));
-    printf("nr_files %lu\n", nr_open);    
+    printf("stat %lu.%09lu\n", ts_seconds(stat_ts), ts_nanosecs(stat_ts));
+    printf("nr_files %lu\n", nr_open);
+    printf("nr_fstat %lu\n", nr_stat);   
 }
 
 int openat_traced(int dirfd, const char *pathname, int flags, ...)
@@ -67,8 +70,33 @@ int openat_traced(int dirfd, const char *pathname, int flags, ...)
     return ret;
 }
 
+int fstat_traced(int fd, struct stat * buf)
+{
+    int err;
+    int ret;
+    mode_t mode = 0;
+    uint64_t diff;
+    struct timespec start, stop;
+
+    err = clock_gettime(CLOCK_REALTIME, &start);
+    assert(err == 0);
+    
+    ret = fstat(fd, buf);
+    
+    err = clock_gettime(CLOCK_REALTIME, &stop);
+    assert(err == 0);
+    
+    diff = as_nanoseconds(&stop) - as_nanoseconds(&start);
+    stat_ts += diff;
+    nr_stat += 1;
+    
+    // printf("stat %lu %lu.%09lu\n", buf->st_ino, ts_seconds(diff), ts_nanosecs(diff));
+    
+    return ret;    
+}
+
 // TODO: this is using safe_read, which sometimes does multiple read calls
-int read_traced (const char * pathname, int fd, void *buf, size_t count)
+int read_traced(const char * pathname, int fd, void *buf, size_t count)
 {
     int ret;
     int err;
