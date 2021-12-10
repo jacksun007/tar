@@ -19,6 +19,7 @@
 size_t blocking_read (int fd, void *buf, size_t count);
 
 static uint64_t open_ts = 0, read_ts = 0;
+static uint64_t nr_open = 0;
 
 #define ts_seconds(TS) ((TS) / (uint64_t)1000000000L)
 #define ts_nanosecs(TS) ((TS) % (uint64_t)1000000000L)
@@ -30,7 +31,8 @@ inline uint64_t as_nanoseconds(struct timespec* ts) {
 void print_traced(void)
 {
     printf("open %lu.%09lu\n", ts_seconds(open_ts), ts_nanosecs(open_ts));
-    printf("read %lu.%09lu\n", ts_seconds(read_ts), ts_nanosecs(read_ts));       
+    printf("read %lu.%09lu\n", ts_seconds(read_ts), ts_nanosecs(read_ts));
+    printf("nr_files %lu\n", nr_open);    
 }
 
 int openat_traced(int dirfd, const char *pathname, int flags, ...)
@@ -58,6 +60,7 @@ int openat_traced(int dirfd, const char *pathname, int flags, ...)
     
     diff = as_nanoseconds(&stop) - as_nanoseconds(&start);
     open_ts += diff;
+    nr_open += 1;
     
     //printf("open %s %lu.%09lu\n", pathname, ts_seconds(diff), ts_nanosecs(diff));
     
