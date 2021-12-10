@@ -479,8 +479,11 @@ file_dumpable_p (struct stat const *st)
     return true;
   if (! (S_ISREG (st->st_mode) || S_ISCTG (st->st_mode)))
     return false;
-  if (dev_null_output)
-    return totals_option && sparse_option && ST_IS_SPARSE (*st);
+    
+  // (jsun): removing this option for now
+  //if (dev_null_output)
+  //  return totals_option && sparse_option && ST_IS_SPARSE (*st);
+  
   return ! (st->st_size == 0 && (st->st_mode & MODE_R) == MODE_R);
 }
 
